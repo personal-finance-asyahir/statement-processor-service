@@ -59,7 +59,7 @@ public class MaybankDebitReader implements StatementReader {
                     List<MaybankDebit> debits = new ArrayList<>();
 
                     for (int k = 0; k < cells.size(); k++) {
-                        RectangularTextContainer content = cells.get(k);
+                        RectangularTextContainer<TextChunk> content = cells.get(k);
                         List<String> items = this.getItems(content);
 
                         switch (k) {
@@ -87,7 +87,7 @@ public class MaybankDebitReader implements StatementReader {
                             case 3:
                                 List<String> statementBalances = this.getStatementAmounts(items);
                                 if (CollectionUtils.size(statementBalances) > CollectionUtils.size(debits)) {
-                                    statementBalances.remove(0);
+                                    statementBalances.removeFirst();
                                 }
 
                                 for (int p = 0; p < statementBalances.size(); p++) {
@@ -128,12 +128,10 @@ public class MaybankDebitReader implements StatementReader {
                 .orElse(null);
     }
 
-    private List<String> getItems(RectangularTextContainer content) {
-        return (List<String>) content.getTextElements().stream().map(te -> {
-            TextChunk textChunk = (TextChunk) te;
-            TextChunkCustom custom = new TextChunkCustom(textChunk);
-            return custom.getText();
-        }).collect(Collectors.toList());
+    private List<String> getItems(RectangularTextContainer<TextChunk> content) {
+        return content.getTextElements().stream()
+                .map(te -> new TextChunkCustom(te).getText())
+                .collect(Collectors.toList());
     }
 
     private List<MaybankDebit> generateDebitList(List<String> items) {
@@ -170,7 +168,7 @@ public class MaybankDebitReader implements StatementReader {
         return (ArrayList<String>) prevList;
     }
 
-    private BinaryOperator<ArrayList<String>> combinerMergeDescription = (c, d)->{
+    private final BinaryOperator<ArrayList<String>> combinerMergeDescription = (c, d)->{
         // For sequential streams, the combiner is irrelevant — it’s not used at all.
         c.addAll(d);
         return c;
@@ -182,13 +180,13 @@ public class MaybankDebitReader implements StatementReader {
                         "BEGINNING BALANCE",
                         "ENDING BALANCE", "TOTAL CREDIT", "TOTAL DEBIT",
                         "ECTED BY PIDM", "AY NOW SWITCH YOUR CONVENTIONAL CURRENT OR SAVIN"))
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     private List<String> getTransactionAmounts (List<String> items) {
         return items.stream()
                 .filter(s -> s.matches("\\d+(\\.\\d+)?[+-]"))
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     private List<String> getStatementAmounts (List<String> items) {
