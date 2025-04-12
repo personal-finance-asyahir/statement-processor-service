@@ -1,4 +1,4 @@
-package com.devsy.statementprocessorservice.pojo;
+package com.asyahir.statementprocessorservice.pojo;
 
 import org.apache.commons.collections4.CollectionUtils;
 import technology.tabula.TextChunk;
