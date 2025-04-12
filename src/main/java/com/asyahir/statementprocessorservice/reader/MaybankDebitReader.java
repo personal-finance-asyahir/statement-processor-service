@@ -1,8 +1,8 @@
-package com.devsy.statementprocessorservice.reader;
+package com.asyahir.statementprocessorservice.reader;
 
 
-import com.devsy.statementprocessorservice.pojo.MaybankDebit;
-import com.devsy.statementprocessorservice.pojo.TextChunkCustom;
+import com.asyahir.statementprocessorservice.pojo.MaybankDebit;
+import com.asyahir.statementprocessorservice.pojo.TextChunkCustom;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

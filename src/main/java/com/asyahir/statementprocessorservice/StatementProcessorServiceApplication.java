@@ -1,4 +1,4 @@
-package com.devsy.statementprocessorservice;
+package com.asyahir.statementprocessorservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

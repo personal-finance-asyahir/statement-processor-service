@@ -1,4 +1,4 @@
-package com.devsy.statementprocessorservice.pojo;
+package com.asyahir.statementprocessorservice.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

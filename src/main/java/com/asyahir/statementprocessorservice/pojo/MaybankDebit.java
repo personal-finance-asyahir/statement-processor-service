@@ -1,4 +1,4 @@
-package com.devsy.statementprocessorservice.pojo;
+package com.asyahir.statementprocessorservice.pojo;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
