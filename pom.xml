@@ -40,6 +40,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Start: Spring Batch Dependency -->
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+            <version>5.2.2</version>
+        </dependency>
+
         <!-- Start: PDF Processor Dependency-->
         <dependency>
             <groupId>technology.tabula</groupId>
