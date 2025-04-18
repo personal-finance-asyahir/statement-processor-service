@@ -24,11 +24,11 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class MaybankDebitReader implements StatementReader<MaybankDebit> {
+public class MaybankDebitStatementReader implements StatementReader<MaybankDebit> {
 
     public static void main(String[] args) {
         try {
-            MaybankDebitReader reader = new MaybankDebitReader();
+            MaybankDebitStatementReader reader = new MaybankDebitStatementReader();
             File file = new ClassPathResource("mypdf.pdf").getFile();
             reader.read(file);
         } catch (IOException ioException) {
