@@ -1,6 +1,6 @@
 package com.asyahir.statementprocessorservice.entity;
 
-import com.asyahir.statementprocessorservice.constants.StatementType;
+import com.asyahir.statementprocessorservice.constant.StatementType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.asyahir.statementprocessorservice.constants;
+package com.asyahir.statementprocessorservice.constant;
 
 public enum StatementType {
     MAYBANK_DEBIT,

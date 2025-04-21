@@ -1,6 +1,6 @@
 package com.asyahir.statementprocessorservice.processor;
 
-import com.asyahir.statementprocessorservice.constants.StatementType;
+import com.asyahir.statementprocessorservice.constant.StatementType;
 import com.asyahir.statementprocessorservice.entity.Transaction;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebit;
 import org.apache.commons.lang3.StringUtils;
