@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.batch.item.ItemProcessor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class MaybankDebitItemProcessor implements ItemProcessor<MaybankDebit, Transaction> {
     @Override
@@ -20,14 +20,14 @@ public class MaybankDebitItemProcessor implements ItemProcessor<MaybankDebit, Tr
         char operation = amt.charAt(amountLength);
         double amount = Double.parseDouble(StringUtils.left(amt, amountLength));
 
-        LocalDateTime transactionDate = LocalDateTime.parse(item.getDate());
+        LocalDate transactionDate = LocalDate.parse(item.getDate());
 
         return Transaction.builder()
-                .type(StatementType.MAYBANK_DEBIT)
+                .statementType(StatementType.MAYBANK_DEBIT)
                 .description(StringUtils.trim(item.getDescription()))
                 .operation(operation)
                 .amount(amount)
-                .date(transactionDate)
+                .transactionDate(transactionDate)
                 .build();
     }
 }

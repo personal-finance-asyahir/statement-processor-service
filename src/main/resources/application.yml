@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: statement-processor-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/personal_finance_db
+    username: asyahir
+    password: password
+  jpa:
+    properties:
+      hibernate:
+        default_schema: statement_processor_db
