@@ -4,6 +4,7 @@ import com.asyahir.statementprocessorservice.entity.Transaction;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebit;
 import com.asyahir.statementprocessorservice.processor.MaybankDebitItemProcessor;
 import com.asyahir.statementprocessorservice.reader.MaybankDebitItemReader;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +17,8 @@ import java.io.IOException;
 public class MaybankDebitBatchConfiguration {
 
     @Bean
-    public ItemReader<MaybankDebit> reader(@Value("#{jobParameters[input.file.name]") String resource) throws IOException {
+    @StepScope
+    public ItemReader<MaybankDebit> reader(@Value("#{jobParameters[input.file.name]}") String resource) throws IOException {
         return new MaybankDebitItemReader(resource);
     }
 
@@ -25,5 +27,7 @@ public class MaybankDebitBatchConfiguration {
         return new MaybankDebitItemProcessor();
     }
 
-    
+
+
+
 }

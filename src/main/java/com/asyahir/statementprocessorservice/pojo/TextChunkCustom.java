@@ -17,11 +17,9 @@ public class TextChunkCustom extends TextChunk {
             return "";
         } else {
             StringBuilder sb = new StringBuilder();
-
             for(TextElement te : this.textElements) {
                 sb.append(te.getText());
             }
-
             return Normalizer.normalize(sb.toString(), Normalizer.Form.NFKC);
         }
     }
