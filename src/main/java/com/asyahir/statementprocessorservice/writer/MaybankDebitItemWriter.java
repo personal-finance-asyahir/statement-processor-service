@@ -1,14 +1,21 @@
 package com.asyahir.statementprocessorservice.writer;
 
 import com.asyahir.statementprocessorservice.entity.Transaction;
+import com.asyahir.statementprocessorservice.repository.TransactionRepository;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 
-public class MaybankDebitItemWriter<Transaction> implements ItemWriter<Transaction> {
+public class MaybankDebitItemWriter implements ItemWriter<Transaction> {
+
+    private final TransactionRepository transactionRepository;
+
+    public MaybankDebitItemWriter(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
+    }
 
     @Override
     public void write(@NonNull Chunk<? extends Transaction> chunk) throws Exception {
-
+        chunk.getItems().forEach(transactionRepository::save);
     }
 }
