@@ -6,6 +6,8 @@ import com.asyahir.statementprocessorservice.pojo.TextChunkCustom;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.CurrencyValidator;
+import org.apache.commons.validator.routines.DateValidator;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.core.io.ClassPathResource;
@@ -63,22 +65,22 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
                         List<String> items = this.getItems(content);
 
                         switch (k) {
-                            case 0:
+                            case 0: // Date
                                 debits.addAll(this.generateDebitList(items));
                                 break;
 
-                            case 1:
+                            case 1: // Transaction Description
                                 if (CollectionUtils.isEmpty(debits)) break;
                                 List<String> descriptions = this.getTransactionDescriptionsOrAssignPrevious(items, allDebits);
                                 this.updateDebits(debits, descriptions, MaybankDebit::setDescription);
                                 break;
 
-                            case 2:
-                                List<String> filters = this.getTransactionAmounts(items);
-                                this.updateDebits(debits, filters, MaybankDebit::setAmount);
+                            case 2: // Transaction Amount
+                                List<String> amounts = this.getTransactionAmounts(items);
+                                this.updateDebits(debits, amounts, MaybankDebit::setAmount);
                                 break;
 
-                            case 3:
+                            case 3: // Statement Balance
                                 List<String> statementBalances = this.getStatementAmounts(items);
                                 if (CollectionUtils.size(statementBalances) > CollectionUtils.size(debits)) {
                                     statementBalances.removeFirst();
@@ -88,9 +90,10 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
                     }
                     allDebits.addAll(debits);
                 }
-                System.out.println("All debits: " + allDebits);
+
             }
 
+            System.out.println("All debits: " + allDebits);
             return allDebits;
 
         } catch (IOException e) {
@@ -122,11 +125,20 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
     }
 
     private List<MaybankDebit> generateDebitList(List<String> items) {
-        return items.stream().map(StringUtils::trim).filter(s -> s.matches("\\d{2}/\\d{2}/\\d{2}")).map(itm -> MaybankDebit.builder().date(itm).build()).collect(Collectors.toUnmodifiableList());
+        return items.stream().map(StringUtils::trim)
+                .filter(s -> DateValidator.getInstance().isValid(s, "dd/MM/yy"))
+                .map(s -> MaybankDebit.builder()
+                        .date(s)
+                        .build())
+                .collect(Collectors.toList());
+
+        //return items.stream().map(StringUtils::trim).filter(s -> s.matches("\\d{2}/\\d{2}/\\d{2}")).map(itm -> MaybankDebit.builder().date(itm).build()).collect(Collectors.toUnmodifiableList());
     }
 
     private List<String> getTransactionDescriptionsOrAssignPrevious(List<String> items, List<MaybankDebit> globalDebits) {
-        List<String> transactionDescriptions = items.stream().reduce(new ArrayList<String>(), (prevList, nextText) -> this.accumulatorMergeDescriptions(prevList, nextText, globalDebits), this.combinerMergeDescription);
+        List<String> transactionDescriptions = items.stream().reduce(new ArrayList<String>(),
+                (prevList, nextText) -> this.accumulatorMergeDescriptions(prevList, nextText, globalDebits),
+                this.combinerMergeDescription);
         return this.filterIrrelevantDescriptions(transactionDescriptions);
     }
 
@@ -155,15 +167,30 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
     };
 
     private List<String> filterIrrelevantDescriptions(List<String> descriptions) {
-        return descriptions.stream().filter(d -> !StringUtils.containsAnyIgnoreCase(d, "BEGINNING BALANCE", "ENDING BALANCE", "TOTAL CREDIT", "TOTAL DEBIT", "ECTED BY PIDM", "AY NOW SWITCH YOUR CONVENTIONAL CURRENT OR SAVIN")).toList();
+        return descriptions.stream()
+                .filter(d -> !StringUtils.containsAnyIgnoreCase(d, "BEGINNING BALANCE",
+                        "ENDING BALANCE",
+                        "TOTAL CREDIT",
+                        "TOTAL DEBIT",
+                        "ECTED BY PIDM",
+                        "AY NOW SWITCH YOUR CONVENTIONAL CURRENT OR SAVIN"))
+                .toList();
     }
 
     private List<String> getTransactionAmounts(List<String> items) {
-        return items.stream().filter(s -> s.matches("\\d+(\\.\\d+)?[+-]")).toList();
+        return items.stream()
+                .filter(s -> StringUtils.indexOfAny(s, "+", "-") > -1)
+                .filter(s -> {
+                    int operationIndex = StringUtils.length(s) - 1;
+                    String number = StringUtils.left(s, operationIndex);
+                    return CurrencyValidator.getInstance().isValid(number);
+                }).collect(Collectors.toList());
     }
 
     private List<String> getStatementAmounts(List<String> items) {
-        return items.stream().filter(s -> s.matches("\\d+(\\.\\d+)?")).collect(Collectors.toList());
+        return items.stream()
+                .filter(s -> CurrencyValidator.getInstance().isValid(s))
+                .collect(Collectors.toList());
     }
 
     private void updateDebits(List<MaybankDebit> debits, List<String> data, BiConsumer<MaybankDebit, String> setter) {
