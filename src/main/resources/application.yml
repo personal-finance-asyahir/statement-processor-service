@@ -9,3 +9,8 @@ spring:
     properties:
       hibernate:
         default_schema: statement_processor_db
+#    generate-ddl: true
+  batch:
+    jdbc:
+      initialize-schema: always
+      table-prefix: statement_processor_db.batch_

@@ -127,12 +127,8 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
     private List<MaybankDebit> generateDebitList(List<String> items) {
         return items.stream().map(StringUtils::trim)
                 .filter(s -> DateValidator.getInstance().isValid(s, "dd/MM/yy"))
-                .map(s -> MaybankDebit.builder()
-                        .date(s)
-                        .build())
-                .collect(Collectors.toList());
-
-        //return items.stream().map(StringUtils::trim).filter(s -> s.matches("\\d{2}/\\d{2}/\\d{2}")).map(itm -> MaybankDebit.builder().date(itm).build()).collect(Collectors.toUnmodifiableList());
+                .map(s -> MaybankDebit.builder().date(s).build())
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private List<String> getTransactionDescriptionsOrAssignPrevious(List<String> items, List<MaybankDebit> globalDebits) {
