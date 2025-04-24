@@ -22,6 +22,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
     private String userId;
+    @Enumerated(EnumType.STRING)
     private StatementType statementType;
     private Double amount;
     private String description;

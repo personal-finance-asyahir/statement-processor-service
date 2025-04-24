@@ -8,26 +8,34 @@ import org.springframework.lang.NonNull;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 public class MaybankDebitItemProcessor implements ItemProcessor<MaybankDebit, Transaction> {
     @Override
     public Transaction process(@NonNull MaybankDebit item) throws Exception {
 
         String amt = item.getAmount();
-        int amountLength = StringUtils.length(amt) - 1;
+        int operationIndex = StringUtils.length(amt) - 1;
 
         // Getting Amount and Operations
-        char operation = amt.charAt(amountLength);
-        double amount = Double.parseDouble(StringUtils.left(amt, amountLength));
+        char operation = amt.charAt(operationIndex);
+        String amountStr = StringUtils.replace(StringUtils.left(amt, operationIndex), ",", StringUtils.EMPTY);
+        Double amount = Double.parseDouble(amountStr);
 
-        LocalDate transactionDate = LocalDate.parse(item.getDate());
+        // Convert into LocalDate
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
+        LocalDate transactionDate = LocalDate.parse(item.getDate(), formatter);
 
         return Transaction.builder()
                 .statementType(StatementType.MAYBANK_DEBIT)
+                .userId(UUID.randomUUID().toString())
                 .description(StringUtils.trim(item.getDescription()))
                 .operation(operation)
                 .amount(amount)
                 .transactionDate(transactionDate)
+                .createdDateTime(LocalDateTime.now())
                 .build();
     }
 }

@@ -20,16 +20,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Configuration
-@EnableBatchProcessing
+@EnableBatchProcessing(tablePrefix = "statement_processor_db.batch_")
 public class MaybankDebitBatchConfiguration {
 
     @Bean
     @StepScope
-    public ItemReader<MaybankDebit> reader(@Value("#{jobParameters[input.file.name]}") String resource) throws IOException {
+    public ItemReader<MaybankDebit> reader(@Value("#{jobParameters['input.file.name']}") String resource) throws IOException {
         return new MaybankDebitItemReader(resource);
     }
 
@@ -45,7 +47,7 @@ public class MaybankDebitBatchConfiguration {
 
     @Bean
     public Step step1(JobRepository jobRepository,
-                      DataSourceTransactionManager transactionManager,
+                      PlatformTransactionManager transactionManager,
                       ItemReader<MaybankDebit> reader,
                       ItemProcessor<MaybankDebit, Transaction> processor,
                       ItemWriter<Transaction> writer){
@@ -60,7 +62,8 @@ public class MaybankDebitBatchConfiguration {
 
     @Bean
     public Job maybankDebitJob (JobRepository jobRepository, Step step1) {
-        return new JobBuilder("maybankDebitJob", jobRepository)
+        var name = "maybankDebitJob" + LocalDateTime.now();
+        return new JobBuilder(name, jobRepository)
                 .start(step1)
                 .build();
     }
