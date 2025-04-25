@@ -1,7 +1,7 @@
 package com.asyahir.statementprocessorservice.reader;
 
 
-import com.asyahir.statementprocessorservice.pojo.MaybankDebit;
+import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import com.asyahir.statementprocessorservice.pojo.TextChunkCustom;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,7 +26,7 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class MaybankDebitStatementReader implements StatementReader<MaybankDebit> {
+public class MaybankDebitStatementReader implements StatementReader<MaybankDebitData> {
 
     public static void main(String[] args) {
         try {
@@ -39,12 +39,12 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
     }
 
     @Override
-    public List<MaybankDebit> read(File file) {
+    public List<MaybankDebitData> read(File file) {
         try {
             PDDocument document = Loader.loadPDF(file);
             SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
             PageIterator pi = new ObjectExtractor(document).extract();
-            List<MaybankDebit> allDebits = new ArrayList<>();
+            List<MaybankDebitData> allDebits = new ArrayList<>();
 
             while (pi.hasNext()) {
                 Page page = pi.next();
@@ -58,7 +58,7 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
 
                 for (int i = 1; i < rows.size(); i++) {
                     List<RectangularTextContainer> cells = rows.get(i);
-                    List<MaybankDebit> debits = new ArrayList<>();
+                    List<MaybankDebitData> debits = new ArrayList<>();
 
                     for (int k = 0; k < cells.size(); k++) {
                         RectangularTextContainer<TextChunk> content = cells.get(k);
@@ -72,12 +72,12 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
                             case 1: // Transaction Description
                                 if (CollectionUtils.isEmpty(debits)) break;
                                 List<String> descriptions = this.getTransactionDescriptionsOrAssignPrevious(items, allDebits);
-                                this.updateDebits(debits, descriptions, MaybankDebit::setDescription);
+                                this.updateDebits(debits, descriptions, MaybankDebitData::setDescription);
                                 break;
 
                             case 2: // Transaction Amount
                                 List<String> amounts = this.getTransactionAmounts(items);
-                                this.updateDebits(debits, amounts, MaybankDebit::setAmount);
+                                this.updateDebits(debits, amounts, MaybankDebitData::setAmount);
                                 break;
 
                             case 3: // Statement Balance
@@ -85,15 +85,13 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
                                 if (CollectionUtils.size(statementBalances) > CollectionUtils.size(debits)) {
                                     statementBalances.removeFirst();
                                 }
-                                this.updateDebits(debits, statementBalances, MaybankDebit::setStatementBalance);
+                                this.updateDebits(debits, statementBalances, MaybankDebitData::setStatementBalance);
                         }
                     }
                     allDebits.addAll(debits);
                 }
 
             }
-
-            System.out.println("All debits: " + allDebits);
             return allDebits;
 
         } catch (IOException e) {
@@ -124,21 +122,21 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
         return content.getTextElements().stream().map(te -> new TextChunkCustom(te).getText()).collect(Collectors.toList());
     }
 
-    private List<MaybankDebit> generateDebitList(List<String> items) {
+    private List<MaybankDebitData> generateDebitList(List<String> items) {
         return items.stream().map(StringUtils::trim)
                 .filter(s -> DateValidator.getInstance().isValid(s, "dd/MM/yy"))
-                .map(s -> MaybankDebit.builder().date(s).build())
+                .map(s -> MaybankDebitData.builder().date(s).build())
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    private List<String> getTransactionDescriptionsOrAssignPrevious(List<String> items, List<MaybankDebit> globalDebits) {
+    private List<String> getTransactionDescriptionsOrAssignPrevious(List<String> items, List<MaybankDebitData> globalDebits) {
         List<String> transactionDescriptions = items.stream().reduce(new ArrayList<String>(),
                 (prevList, nextText) -> this.accumulatorMergeDescriptions(prevList, nextText, globalDebits),
                 this.combinerMergeDescription);
         return this.filterIrrelevantDescriptions(transactionDescriptions);
     }
 
-    private ArrayList<String> accumulatorMergeDescriptions(List<String> prevList, String nextText, List<MaybankDebit> globalDebits) {
+    private ArrayList<String> accumulatorMergeDescriptions(List<String> prevList, String nextText, List<MaybankDebitData> globalDebits) {
         if (StringUtils.startsWith(nextText, " ")) {
             String item = StringUtils.trim(nextText);
             if (CollectionUtils.isNotEmpty(prevList)) {
@@ -146,7 +144,7 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
                 prevList.set(lastIndex, prevList.get(lastIndex) + " " + item);
             } else {
                 if (CollectionUtils.isNotEmpty(globalDebits)) {
-                    MaybankDebit debit = globalDebits.getLast();
+                    MaybankDebitData debit = globalDebits.getLast();
                     debit.setDescription(debit.getDescription() + " " + item);
                 }
             }
@@ -189,9 +187,9 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
                 .collect(Collectors.toList());
     }
 
-    private void updateDebits(List<MaybankDebit> debits, List<String> data, BiConsumer<MaybankDebit, String> setter) {
+    private void updateDebits(List<MaybankDebitData> debits, List<String> data, BiConsumer<MaybankDebitData, String> setter) {
         for (int p = 0; p < data.size(); p++) {
-            MaybankDebit debit = debits.get(p);
+            MaybankDebitData debit = debits.get(p);
             setter.accept(debit, data.get(p));
         }
     }

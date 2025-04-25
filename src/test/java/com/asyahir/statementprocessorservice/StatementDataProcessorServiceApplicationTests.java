@@ -1,10 +1,10 @@
-package com.devsy.statementprocessorservice;
+package com.asyahir.statementprocessorservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class StatementProcessorServiceApplicationTests {
+class StatementDataProcessorServiceApplicationTests {
 
     @Test
     void contextLoads() {

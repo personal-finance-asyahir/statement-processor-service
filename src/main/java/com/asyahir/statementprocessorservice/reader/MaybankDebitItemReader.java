@@ -1,6 +1,6 @@
 package com.asyahir.statementprocessorservice.reader;
 
-import com.asyahir.statementprocessorservice.pojo.MaybankDebit;
+import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;
@@ -12,20 +12,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class MaybankDebitItemReader implements ItemReader<MaybankDebit> {
+public class MaybankDebitItemReader implements ItemReader<MaybankDebitData> {
 
-    private final List<MaybankDebit> maybankDebits;
+    private final List<MaybankDebitData> maybankDebitData;
 
     public MaybankDebitItemReader(String pathfile) throws IOException {
         File file = new ClassPathResource(pathfile).getFile();
         MaybankDebitStatementReader reader = new MaybankDebitStatementReader();
-        maybankDebits = reader.read(file);
+        maybankDebitData = reader.read(file);
     }
 
     @Override
-    public MaybankDebit read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-        if (CollectionUtils.isNotEmpty(maybankDebits)) {
-            return maybankDebits.removeFirst();
+    public MaybankDebitData read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        if (CollectionUtils.isNotEmpty(maybankDebitData)) {
+            return maybankDebitData.removeFirst();
         }
         return null;
     }

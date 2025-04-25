@@ -1,7 +1,6 @@
 package com.asyahir.statementprocessorservice.controller;
 
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -11,6 +10,8 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+
+import java.util.UUID;
 
 @Controller
 public class JobLauncherController {
@@ -30,6 +31,7 @@ public class JobLauncherController {
     public void handle() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
         var jobParameters = new JobParametersBuilder()
                 .addString("input.file.name", "mypdf.pdf")
+                .addString("input.file.userid", UUID.randomUUID().toString())
                 .toJobParameters();
         jobLauncher.run(maybankDebitJob, jobParameters);
     }
