@@ -1,10 +1,12 @@
 package com.asyahir.statementprocessorservice.batch;
 
-import com.asyahir.statementprocessorservice.entity.Transaction;
-import com.asyahir.statementprocessorservice.pojo.MaybankDebit;
+import com.asyahir.statementprocessorservice.entity.MaybankDebit;
+import com.asyahir.statementprocessorservice.listener.MaybankDebitItemReadListener;
+import com.asyahir.statementprocessorservice.listener.MaybankDebitJobExecutionListener;
+import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import com.asyahir.statementprocessorservice.processor.MaybankDebitItemProcessor;
 import com.asyahir.statementprocessorservice.reader.MaybankDebitItemReader;
-import com.asyahir.statementprocessorservice.repository.TransactionRepository;
+import com.asyahir.statementprocessorservice.repository.MaybankDebitRepository;
 import com.asyahir.statementprocessorservice.writer.MaybankDebitItemWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -19,7 +21,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
@@ -29,41 +30,50 @@ import java.time.LocalDateTime;
 @EnableBatchProcessing(tablePrefix = "statement_processor_db.batch_")
 public class MaybankDebitBatchConfiguration {
 
+    private static final String JOB_NAME = "maybank-debit-job";
+
+    private static final String STEP1_NAME = "maybank-debit-step-1";
+
     @Bean
     @StepScope
-    public ItemReader<MaybankDebit> reader(@Value("#{jobParameters['input.file.name']}") String resource) throws IOException {
+    public ItemReader<MaybankDebitData> maybankDebitReader(@Value("#{jobParameters['input.file.name']}") String resource) throws IOException {
         return new MaybankDebitItemReader(resource);
     }
 
     @Bean
-    public ItemProcessor<MaybankDebit, Transaction> processor() {
-        return new MaybankDebitItemProcessor();
+    @StepScope
+    public ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor(@Value("#{jobParameters['input.file.userid']}") String userId) {
+        return new MaybankDebitItemProcessor(userId);
     }
 
     @Bean
-    public ItemWriter<Transaction> writer(TransactionRepository transactionRepository) {
-        return new MaybankDebitItemWriter(transactionRepository);
+    public ItemWriter<MaybankDebit> maybankDebitWriter(MaybankDebitRepository maybankDebitRepository) {
+        return new MaybankDebitItemWriter(maybankDebitRepository);
     }
 
     @Bean
     public Step step1(JobRepository jobRepository,
                       PlatformTransactionManager transactionManager,
-                      ItemReader<MaybankDebit> reader,
-                      ItemProcessor<MaybankDebit, Transaction> processor,
-                      ItemWriter<Transaction> writer){
+                      ItemReader<MaybankDebitData> maybankDebitReader,
+                      ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor,
+                      ItemWriter<MaybankDebit> maybankDebitWriter,
+                      MaybankDebitItemReadListener readListener){
 
-        return new StepBuilder("maybankDebitStep1", jobRepository)
-                .<MaybankDebit, Transaction>chunk(5, transactionManager)
-                .reader(reader)
-                .processor(processor)
-                .writer(writer)
+        return new StepBuilder(STEP1_NAME, jobRepository)
+                .<MaybankDebitData, MaybankDebit>chunk(5, transactionManager)
+                .reader(maybankDebitReader)
+                .listener(readListener)
+                .processor(maybankDebitProcessor)
+                .writer(maybankDebitWriter)
                 .build();
     }
 
     @Bean
-    public Job maybankDebitJob (JobRepository jobRepository, Step step1) {
-        var name = "maybankDebitJob" + LocalDateTime.now();
-        return new JobBuilder(name, jobRepository)
+    public Job maybankDebitJob (JobRepository jobRepository,
+                                Step step1,
+                                MaybankDebitJobExecutionListener jobExecutionListener) {
+        return new JobBuilder(JOB_NAME, jobRepository)
+                .listener(jobExecutionListener)
                 .start(step1)
                 .build();
     }

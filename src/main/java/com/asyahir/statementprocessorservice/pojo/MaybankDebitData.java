@@ -8,6 +8,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
-public class MaybankDebit extends Statement {
+public class MaybankDebitData extends StatementData {
     private String statementBalance;
 }

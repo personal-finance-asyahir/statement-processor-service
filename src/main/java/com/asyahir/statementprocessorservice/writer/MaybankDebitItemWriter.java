@@ -1,23 +1,23 @@
 package com.asyahir.statementprocessorservice.writer;
 
-import com.asyahir.statementprocessorservice.entity.Transaction;
-import com.asyahir.statementprocessorservice.repository.TransactionRepository;
+import com.asyahir.statementprocessorservice.entity.MaybankDebit;
+import com.asyahir.statementprocessorservice.repository.MaybankDebitRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 
-public class MaybankDebitItemWriter implements ItemWriter<Transaction> {
+public class MaybankDebitItemWriter implements ItemWriter<MaybankDebit> {
 
-    private final TransactionRepository transactionRepository;
+    private final MaybankDebitRepository maybankDebitRepository;
 
-    public MaybankDebitItemWriter(TransactionRepository transactionRepository) {
-        this.transactionRepository = transactionRepository;
+    public MaybankDebitItemWriter(MaybankDebitRepository maybankDebitRepository) {
+        this.maybankDebitRepository = maybankDebitRepository;
     }
 
     @Override
     @Transactional
-    public void write(@NonNull Chunk<? extends Transaction> chunk) throws Exception {
-        chunk.getItems().forEach(transactionRepository::save);
+    public void write(@NonNull Chunk<? extends MaybankDebit> chunk) throws Exception {
+        chunk.getItems().forEach(maybankDebitRepository::save);
     }
 }
