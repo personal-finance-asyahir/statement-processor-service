@@ -8,11 +8,8 @@ import com.asyahir.statementprocessorservice.processor.MaybankDebitItemProcessor
 import com.asyahir.statementprocessorservice.reader.MaybankDebitItemReader;
 import com.asyahir.statementprocessorservice.repository.MaybankDebitRepository;
 import com.asyahir.statementprocessorservice.writer.MaybankDebitItemWriter;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -24,13 +21,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 @Configuration
-@EnableBatchProcessing(tablePrefix = "statement_processor_db.batch_")
 public class MaybankDebitBatchConfiguration {
-
-    private static final String JOB_NAME = "maybank-debit-job";
 
     private static final String STEP1_NAME = "maybank-debit-step-1";
 
@@ -52,7 +45,7 @@ public class MaybankDebitBatchConfiguration {
     }
 
     @Bean
-    public Step step1(JobRepository jobRepository,
+    public Step maybankDebitStep(JobRepository jobRepository,
                       PlatformTransactionManager transactionManager,
                       ItemReader<MaybankDebitData> maybankDebitReader,
                       ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor,
@@ -65,16 +58,6 @@ public class MaybankDebitBatchConfiguration {
                 .listener(readListener)
                 .processor(maybankDebitProcessor)
                 .writer(maybankDebitWriter)
-                .build();
-    }
-
-    @Bean
-    public Job maybankDebitJob (JobRepository jobRepository,
-                                Step step1,
-                                MaybankDebitJobExecutionListener jobExecutionListener) {
-        return new JobBuilder(JOB_NAME, jobRepository)
-                .listener(jobExecutionListener)
-                .start(step1)
                 .build();
     }
 
