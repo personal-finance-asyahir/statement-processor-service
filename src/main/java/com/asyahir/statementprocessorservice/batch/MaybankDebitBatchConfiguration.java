@@ -58,6 +58,7 @@ public class MaybankDebitBatchConfiguration {
                 .listener(readListener)
                 .processor(maybankDebitProcessor)
                 .writer(maybankDebitWriter)
+                .ta
                 .build();
     }
 

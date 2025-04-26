@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
@@ -38,14 +39,14 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
         }
     }
 
+    private final List<MaybankDebitData> allDebits = new ArrayList<>();
+
     @Override
     public List<MaybankDebitData> read(File file) {
         try {
             PDDocument document = Loader.loadPDF(file);
             SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
             PageIterator pi = new ObjectExtractor(document).extract();
-            List<MaybankDebitData> allDebits = new ArrayList<>();
-
             while (pi.hasNext()) {
                 Page page = pi.next();
                 List<Ruling> rulings = this.getCustomizedRulings(page);
@@ -90,10 +91,8 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
                     }
                     allDebits.addAll(debits);
                 }
-
             }
             return allDebits;
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -115,11 +114,15 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
     }
 
     private Table getFirstTableOnly(List<Table> tables) {
-        return Optional.ofNullable(tables).stream().flatMap(Collection::stream).findFirst().orElse(null);
+        return Optional.ofNullable(tables).stream()
+                .flatMap(Collection::stream)
+                .findFirst().orElse(null);
     }
 
     private List<String> getItems(RectangularTextContainer<TextChunk> content) {
-        return content.getTextElements().stream().map(te -> new TextChunkCustom(te).getText()).collect(Collectors.toList());
+        return content.getTextElements().stream()
+                .map(te -> new TextChunkCustom(te).getText())
+                .collect(Collectors.toList());
     }
 
     private List<MaybankDebitData> generateDebitList(List<String> items) {
@@ -130,29 +133,32 @@ public class MaybankDebitStatementReader implements StatementReader<MaybankDebit
     }
 
     private List<String> getTransactionDescriptionsOrAssignPrevious(List<String> items, List<MaybankDebitData> globalDebits) {
-        List<String> transactionDescriptions = items.stream().reduce(new ArrayList<String>(),
-                (prevList, nextText) -> this.accumulatorMergeDescriptions(prevList, nextText, globalDebits),
+        List<String> transactionDescriptions = items.stream().reduce(new ArrayList<>(),
+                this.accumulatorMergeDescriptions,
                 this.combinerMergeDescription);
         return this.filterIrrelevantDescriptions(transactionDescriptions);
     }
 
-    private ArrayList<String> accumulatorMergeDescriptions(List<String> prevList, String nextText, List<MaybankDebitData> globalDebits) {
+    private final BiFunction<ArrayList<String>, String, ArrayList<String>> accumulatorMergeDescriptions = (previousList, nextText) -> {
         if (StringUtils.startsWith(nextText, " ")) {
             String item = StringUtils.trim(nextText);
-            if (CollectionUtils.isNotEmpty(prevList)) {
-                int lastIndex = prevList.size() - 1;
-                prevList.set(lastIndex, prevList.get(lastIndex) + " " + item);
+            if (CollectionUtils.isNotEmpty(previousList)) {
+                int lastIndex = CollectionUtils.size(previousList) - 1;
+                String mergeDescription = previousList.get(lastIndex)
+                        + System.lineSeparator()
+                        + item;
+                previousList.set(lastIndex, mergeDescription);
             } else {
-                if (CollectionUtils.isNotEmpty(globalDebits)) {
-                    MaybankDebitData debit = globalDebits.getLast();
+                if (CollectionUtils.isNotEmpty(this.allDebits)) {
+                    MaybankDebitData debit = this.allDebits.getLast();
                     debit.setDescription(debit.getDescription() + " " + item);
                 }
             }
         } else {
-            prevList.add(nextText);
+            previousList.add(nextText);
         }
-        return (ArrayList<String>) prevList;
-    }
+        return (ArrayList<String>) previousList;
+    };
 
     private final BinaryOperator<ArrayList<String>> combinerMergeDescription = (c, d) -> {
         // For sequential streams, the combiner is irrelevant — it’s not used at all.
