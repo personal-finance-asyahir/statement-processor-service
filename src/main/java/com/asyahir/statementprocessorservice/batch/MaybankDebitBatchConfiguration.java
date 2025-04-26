@@ -18,6 +18,8 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
@@ -26,6 +28,8 @@ import java.io.IOException;
 public class MaybankDebitBatchConfiguration {
 
     private static final String STEP1_NAME = "maybank-debit-step-1";
+
+    private static final String TASK_NAME = "maybank-debit-task-async";
 
     @Bean
     @StepScope
@@ -45,11 +49,17 @@ public class MaybankDebitBatchConfiguration {
     }
 
     @Bean
+    public TaskExecutor maybankDebitTaskExecutor() {
+        return new SimpleAsyncTaskExecutor(TASK_NAME);
+    }
+
+    @Bean
     public Step maybankDebitStep(JobRepository jobRepository,
                       PlatformTransactionManager transactionManager,
                       ItemReader<MaybankDebitData> maybankDebitReader,
                       ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor,
                       ItemWriter<MaybankDebit> maybankDebitWriter,
+                      TaskExecutor maybankDebitTaskExecutor,
                       MaybankDebitItemReadListener readListener){
 
         return new StepBuilder(STEP1_NAME, jobRepository)
@@ -58,7 +68,7 @@ public class MaybankDebitBatchConfiguration {
                 .listener(readListener)
                 .processor(maybankDebitProcessor)
                 .writer(maybankDebitWriter)
-                .ta
+                .taskExecutor(maybankDebitTaskExecutor)
                 .build();
     }
 
