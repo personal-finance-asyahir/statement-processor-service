@@ -64,7 +64,6 @@
             <artifactId>pdfbox</artifactId>
             <version>3.0.4</version>
         </dependency>
-        <!-- End: PDF Processor Dependency-->
 
         <!-- Start: Apache Utilities -->
         <dependency>
@@ -82,7 +81,6 @@
             <artifactId>commons-validator</artifactId>
             <version>1.9.0</version>
         </dependency>
-        <!-- End: Apache Utilities -->
 
         <!-- Start: Lombok -->
         <dependency>
@@ -91,7 +89,6 @@
             <version>1.18.36</version>
             <scope>provided</scope>
         </dependency>
-        <!-- End: Lombok -->
 
         <!-- Start: Postgres -->
         <dependency>
@@ -99,7 +96,6 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.5</version>
         </dependency>
-        <!-- End: Postgres -->
 
         <!-- Start: Spring Data -->
         <dependency>
@@ -107,7 +103,6 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
             <version>3.4.4</version>
         </dependency>
-        <!-- End: Spring Data -->
 
         <!-- Start: Spring Boot Starter Web -->
         <dependency>
@@ -115,7 +110,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <version>3.4.4</version>
         </dependency>
-        <!-- End: Spring Boot Starter Web -->
+
+        <!-- Start: Spring Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>3.3.5</version>
+        </dependency>
 
     </dependencies>
 

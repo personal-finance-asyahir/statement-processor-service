@@ -30,7 +30,7 @@ public class JobLauncherController {
     @Scheduled(fixedDelay = 1000)
     public void handle() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
         var jobParameters = new JobParametersBuilder()
-                .addString("input.file.name", "mypdf.pdf")
+                .addString("input.file.name", "/Users/syahirghariff/Developer/personal-finance-project/bank_statement/mypdf.pdf")
                 .addString("input.file.userid", UUID.randomUUID().toString())
                 .toJobParameters();
         jobLauncher.run(maybankDebitJob, jobParameters);
