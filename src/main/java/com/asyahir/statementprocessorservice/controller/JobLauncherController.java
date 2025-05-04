@@ -27,7 +27,7 @@ public class JobLauncherController {
         this.maybankDebitJob = maybankDebitJob;
     }
 
-    @Scheduled(fixedDelay = 1000)
+//    @Scheduled(fixedDelay = 1000)
     public void handle() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
         var jobParameters = new JobParametersBuilder()
                 .addString("input.file.name", "/Users/syahirghariff/Developer/personal-finance-project/bank_statement/mypdf.pdf")
