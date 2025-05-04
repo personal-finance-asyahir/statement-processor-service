@@ -33,13 +33,13 @@ public class MaybankDebitBatchConfiguration {
 
     @Bean
     @StepScope
-    public ItemReader<MaybankDebitData> maybankDebitReader(@Value("#{jobParameters['input.file.name']}") String resource) throws IOException {
+    public ItemReader<MaybankDebitData> maybankDebitReader(@Value("#{jobParameters['input.statement.filepath']}") String resource) throws IOException {
         return new MaybankDebitItemReader(resource);
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor(@Value("#{jobParameters['input.file.userid']}") String userId) {
+    public ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor(@Value("#{jobParameters['input.statement.userid']}") String userId) {
         return new MaybankDebitItemProcessor(userId);
     }
 
