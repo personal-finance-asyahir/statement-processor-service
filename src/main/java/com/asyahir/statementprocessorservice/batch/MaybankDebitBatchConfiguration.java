@@ -2,6 +2,7 @@ package com.asyahir.statementprocessorservice.batch;
 
 import com.asyahir.statementprocessorservice.entity.MaybankDebit;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitItemReadListener;
+import com.asyahir.statementprocessorservice.listener.MaybankDebitItemWriteListener;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitJobExecutionListener;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import com.asyahir.statementprocessorservice.processor.MaybankDebitItemProcessor;
@@ -55,19 +56,21 @@ public class MaybankDebitBatchConfiguration {
 
     @Bean
     public Step maybankDebitStep(JobRepository jobRepository,
-                      PlatformTransactionManager transactionManager,
-                      ItemReader<MaybankDebitData> maybankDebitReader,
-                      ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor,
-                      ItemWriter<MaybankDebit> maybankDebitWriter,
-                      TaskExecutor maybankDebitTaskExecutor,
-                      MaybankDebitItemReadListener readListener){
+                                 PlatformTransactionManager transactionManager,
+                                 ItemReader<MaybankDebitData> maybankDebitReader,
+                                 ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor,
+                                 ItemWriter<MaybankDebit> maybankDebitWriter,
+                                 TaskExecutor maybankDebitTaskExecutor,
+                                 MaybankDebitItemReadListener readListener,
+                                 MaybankDebitItemWriteListener writeListener){
 
         return new StepBuilder(STEP1_NAME, jobRepository)
-                .<MaybankDebitData, MaybankDebit>chunk(5, transactionManager)
+                .<MaybankDebitData, MaybankDebit>chunk(10, transactionManager)
                 .reader(maybankDebitReader)
                 .listener(readListener)
                 .processor(maybankDebitProcessor)
                 .writer(maybankDebitWriter)
+                .listener(writeListener)
                 .taskExecutor(maybankDebitTaskExecutor)
                 .build();
     }
