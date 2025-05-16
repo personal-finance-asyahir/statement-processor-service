@@ -18,10 +18,6 @@ public class MaybankDebitItemWriter implements ItemWriter<MaybankDebit> {
     @Override
     @Transactional
     public void write(@NonNull Chunk<? extends MaybankDebit> chunk) throws Exception {
-<<<<<<< HEAD
         maybankDebitRepository.saveAll(chunk.getItems());
-=======
-        chunk.getItems().forEach(maybankDebitRepository::save);
->>>>>>> 8459a0c43d0b4f5f5953a2f0b49e71581a400a99
     }
 }
