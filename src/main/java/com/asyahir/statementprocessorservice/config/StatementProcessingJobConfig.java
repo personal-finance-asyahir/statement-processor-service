@@ -1,4 +1,4 @@
-package com.asyahir.statementprocessorservice.job;
+package com.asyahir.statementprocessorservice.config;
 
 import com.asyahir.statementprocessorservice.listener.MaybankDebitJobExecutionListener;
 import org.springframework.batch.core.Job;

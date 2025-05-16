@@ -5,40 +5,29 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.validator.routines.DateValidator;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.springframework.core.io.ClassPathResource;
 import technology.tabula.*;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class MaybankCreditStatementReader implements StatementReader<MaybankCreditData>{
+public class MaybankCreditStatementReader extends StatementReader<MaybankCreditData>{
 
     private final String TEXT_SPLITTER = "_____";
 
     private final List<MaybankCreditData> allCredits = new ArrayList<>();
 
-    public static void main (String[] args) {
-        try {
-            MaybankCreditStatementReader reader = new MaybankCreditStatementReader();
-            File file = new ClassPathResource("3da4e40c-462a-48ca-bf81-bd21e663a733.pdf").getFile();
-            reader.read(file);
-        } catch (IOException ioException) {
-            throw new RuntimeException(ioException);
-        }
-
+    public MaybankCreditStatementReader(String filepath){
+        super(filepath);
     }
 
-    @Override
-    public List<MaybankCreditData> read(File file) {
+    public List<MaybankCreditData> read() {
 
         try {
-            PDDocument document = Loader.loadPDF(file);
+            PDDocument document = Loader.loadPDF(this.file);
             SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
             PageIterator pi = new ObjectExtractor(document).extract();
             while (pi.hasNext()) {

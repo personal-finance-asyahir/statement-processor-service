@@ -6,7 +6,6 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +16,8 @@ public class MaybankDebitItemReader implements ItemReader<MaybankDebitData> {
     private final List<MaybankDebitData> maybankDebitData;
 
     public MaybankDebitItemReader(String pathfile) throws IOException {
-        File file = new File(pathfile);
-        MaybankDebitStatementReader reader = new MaybankDebitStatementReader();
-        maybankDebitData = reader.read(file);
+        MaybankDebitStatementReader reader = new MaybankDebitStatementReader(pathfile);
+        this.maybankDebitData = reader.read();
     }
 
     @Override

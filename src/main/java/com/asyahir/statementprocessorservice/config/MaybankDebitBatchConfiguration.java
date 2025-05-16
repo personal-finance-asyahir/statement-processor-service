@@ -1,9 +1,8 @@
-package com.asyahir.statementprocessorservice.batch;
+package com.asyahir.statementprocessorservice.config;
 
 import com.asyahir.statementprocessorservice.entity.MaybankDebit;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitItemReadListener;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitItemWriteListener;
-import com.asyahir.statementprocessorservice.listener.MaybankDebitJobExecutionListener;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import com.asyahir.statementprocessorservice.processor.MaybankDebitItemProcessor;
 import com.asyahir.statementprocessorservice.reader.MaybankDebitItemReader;

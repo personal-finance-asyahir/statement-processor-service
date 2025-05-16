@@ -27,24 +27,17 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class MaybankDebitStatementReader implements StatementReader<MaybankDebitData> {
-
-    public static void main(String[] args) {
-        try {
-            MaybankDebitStatementReader reader = new MaybankDebitStatementReader();
-            File file = new ClassPathResource("mypdf.pdf").getFile();
-            reader.read(file);
-        } catch (IOException ioException) {
-            throw new RuntimeException(ioException);
-        }
-    }
+public class MaybankDebitStatementReader extends StatementReader<MaybankDebitData> {
 
     private final List<MaybankDebitData> allDebits = new ArrayList<>();
 
-    @Override
-    public List<MaybankDebitData> read(File file) {
+    public MaybankDebitStatementReader(String filePath) {
+        super(filePath);
+    }
+
+    public List<MaybankDebitData> read() {
         try {
-            PDDocument document = Loader.loadPDF(file);
+            PDDocument document = Loader.loadPDF(this.file);
             SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
             PageIterator pi = new ObjectExtractor(document).extract();
             while (pi.hasNext()) {
