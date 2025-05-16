@@ -7,17 +7,17 @@ import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MaybankDebitItemReader implements ItemReader<MaybankDebitData> {
 
-    private final List<MaybankDebitData> maybankDebitData;
+    private final List<MaybankDebitData> maybankDebitData = new ArrayList<>();
 
     public MaybankDebitItemReader(String pathfile) throws IOException {
         StatementReader reader = new MaybankDebitStatementReader(pathfile);
-        this.maybankDebitData = reader.read();
+        this.maybankDebitData.addAll(reader.read());
     }
 
     @Override
