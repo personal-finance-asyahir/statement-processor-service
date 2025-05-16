@@ -43,9 +43,12 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
 
                 if (CollectionUtils.size(tables) <3) return List.of();
 
-                if (isFirstPage) this.extractStatementDate(tables.get(2));
+                Table table = tables.get(2);
 
-                Table table = isFirstPage ? tables.getLast() : tables.get(2);
+                if (isFirstPage)  {
+                    this.extractStatementDate(table);
+                    table = tables.getLast();
+                }
 
                 List<List<RectangularTextContainer>> rows = this.getTrimmedRows(table);
 
