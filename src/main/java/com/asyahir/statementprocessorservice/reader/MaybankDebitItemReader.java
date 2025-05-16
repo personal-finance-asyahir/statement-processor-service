@@ -16,7 +16,7 @@ public class MaybankDebitItemReader implements ItemReader<MaybankDebitData> {
     private final List<MaybankDebitData> maybankDebitData;
 
     public MaybankDebitItemReader(String pathfile) throws IOException {
-        MaybankDebitStatementReader reader = new MaybankDebitStatementReader(pathfile);
+        StatementReader reader = new MaybankDebitStatementReader(pathfile);
         this.maybankDebitData = reader.read();
     }
 
