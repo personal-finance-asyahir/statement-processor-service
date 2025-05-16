@@ -2,13 +2,13 @@ package com.asyahir.statementprocessorservice.reader;
 
 import com.asyahir.statementprocessorservice.pojo.MaybankCreditData;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.DateValidator;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import technology.tabula.*;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,11 +29,6 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
         super(filepath);
     }
 
-    public static void main (String[] args) {
-        StatementReader reader = new MaybankCreditStatementReader("/Users/syahirghariff/Developer/personal-finance-project/bank_statement/0394050410542100_20250312.pdf");
-        reader.read();
-    }
-
     public List<MaybankCreditData> read() {
 
         try {
@@ -42,67 +37,42 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
             PageIterator pi = new ObjectExtractor(document).extract();
             while (pi.hasNext()) {
                 Page page = pi.next();
+                boolean isFirstPage = page.getPageNumber() == 1;
 
                 List<Table> tables = sea.extract(page);
 
-                int pageNumber = page.getPageNumber();
+                if (CollectionUtils.size(tables) <3) return List.of();
 
-                Table mytable = pageNumber == 1 ? tables.get(2) : null;
-                if (mytable != null){
-                    List<List<RectangularTextContainer>> rows = mytable.getRows();
-                    if (CollectionUtils.isNotEmpty(rows)){
-                        rows.removeFirst();
-                    }
-                    for (List<RectangularTextContainer> cells : rows) {
-                        for (int k = 0; k < cells.size(); k++) {
-                            RectangularTextContainer<TextChunk> content = cells.get(k);
-                            String text = content.getText().replace("\r", "");
-                            if (k==0) {
-                                this.statementDate = text;
-                            } else if (k==1) {
-                                this.paymentDueDate = text;
-                            }
-                        }
-                    }
-                }
+                if (isFirstPage) this.extractStatementDate(tables.get(2));
 
-                Table table = pageNumber == 1 ? tables.getLast() : tables.get(2);
+                Table table = isFirstPage ? tables.getLast() : tables.get(2);
 
-                List<List<RectangularTextContainer>> rows = table.getRows();
-                if (CollectionUtils.isNotEmpty(rows)){
-                    rows.removeFirst();
-                }
+                List<List<RectangularTextContainer>> rows = this.getTrimmedRows(table);
 
                 for (List<RectangularTextContainer> cells : rows) {
                     List<MaybankCreditData> credits = new ArrayList<>();
                     for (int k = 0; k < cells.size(); k++) {
                         RectangularTextContainer<TextChunk> content = cells.get(k);
+
                         List<String> items = this.getItems(content);
+
+                        if (isFirstPage) items.removeFirst();
 
                         switch(k) {
                             case 0: // Posting Date
-                                if (pageNumber == 1) {
-                                    items.removeFirst();
-                                }
                                 credits.addAll(this.generateCreditList(items));
                                 break;
                             case 1: // Transaction Date
-                                if (pageNumber == 1) {
-                                    items.removeFirst();
-                                }
                                 this.updateCredits(credits, items, MaybankCreditData::setDate);
                                 break;
                             case 2: // Transaction Description
                                 items = this.getDescriptionItems(content);
-                                if (pageNumber == 1) {
-                                    items = items.subList(8, CollectionUtils.size(items));
+                                if (isFirstPage) {
+                                    items = items.subList(7, CollectionUtils.size(items));
                                 }
                                 this.updateCredits(credits, items, MaybankCreditData::setDescription);
                                 break;
                             case 3: // Amount
-                                if (pageNumber == 1) {
-                                    items.removeFirst();
-                                }
                                 if (CollectionUtils.size(items) > CollectionUtils.size(credits)) {
                                     items.removeLast();
                                 }
@@ -117,6 +87,29 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private void extractStatementDate(Table table){
+        List<List<RectangularTextContainer>> rows = this.getTrimmedRows(table);
+        for (List<RectangularTextContainer> cells : rows) {
+            for (int i = 0; i < cells.size(); i++) {
+                RectangularTextContainer<TextChunk> content = cells.get(i);
+                String text = content.getText().replace("\r", "");
+                if (i==0) {
+                    this.statementDate = StringUtils.trim(text);
+                } else if (i==1) {
+                    this.paymentDueDate = StringUtils.trim(text);
+                }
+            }
+        }
+    }
+
+    private List<List<RectangularTextContainer>> getTrimmedRows (Table table){
+        List<List<RectangularTextContainer>> rows = table.getRows();
+        if (CollectionUtils.isNotEmpty(rows)){
+            rows.removeFirst();
+        }
+        return rows;
     }
 
     private List<MaybankCreditData> generateCreditList(List<String> items) {
