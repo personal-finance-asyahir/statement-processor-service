@@ -10,4 +10,6 @@ import lombok.experimental.SuperBuilder;
 @ToString(callSuper = true)
 public class MaybankCreditData extends StatementData {
     private String postingDate;
+    private String statementDate;
+    private String paymentDueDate;
 }

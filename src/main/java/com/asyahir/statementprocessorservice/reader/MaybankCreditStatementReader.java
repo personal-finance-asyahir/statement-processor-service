@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import technology.tabula.*;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,8 +21,17 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
 
     private final List<MaybankCreditData> allCredits = new ArrayList<>();
 
+    private String statementDate;
+
+    private String paymentDueDate;
+
     public MaybankCreditStatementReader(String filepath){
         super(filepath);
+    }
+
+    public static void main (String[] args) {
+        StatementReader reader = new MaybankCreditStatementReader("/Users/syahirghariff/Developer/personal-finance-project/bank_statement/0394050410542100_20250312.pdf");
+        reader.read();
     }
 
     public List<MaybankCreditData> read() {
@@ -36,6 +46,25 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
                 List<Table> tables = sea.extract(page);
 
                 int pageNumber = page.getPageNumber();
+
+                Table mytable = pageNumber == 1 ? tables.get(2) : null;
+                if (mytable != null){
+                    List<List<RectangularTextContainer>> rows = mytable.getRows();
+                    if (CollectionUtils.isNotEmpty(rows)){
+                        rows.removeFirst();
+                    }
+                    for (List<RectangularTextContainer> cells : rows) {
+                        for (int k = 0; k < cells.size(); k++) {
+                            RectangularTextContainer<TextChunk> content = cells.get(k);
+                            String text = content.getText().replace("\r", "");
+                            if (k==0) {
+                                this.statementDate = text;
+                            } else if (k==1) {
+                                this.paymentDueDate = text;
+                            }
+                        }
+                    }
+                }
 
                 Table table = pageNumber == 1 ? tables.getLast() : tables.get(2);
 
@@ -93,7 +122,10 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
     private List<MaybankCreditData> generateCreditList(List<String> items) {
         return items.stream()
                 .filter(s -> DateValidator.getInstance().isValid(s, "dd/MM"))
-                .map(s -> MaybankCreditData.builder().postingDate(s).build())
+                .map(s -> MaybankCreditData.builder()
+                        .statementDate(statementDate)
+                        .paymentDueDate(paymentDueDate)
+                        .postingDate(s).build())
                 .collect(Collectors.toList());
     }
 
