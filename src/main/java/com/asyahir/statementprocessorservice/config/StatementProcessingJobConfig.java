@@ -24,5 +24,13 @@ public class StatementProcessingJobConfig {
                 .start(maybankDebitStep)
                 .build();
     }
+
+    @Bean
+    public Job maybankCreditJob(JobRepository jobRepository,
+                               Step maybankCreditStep) {
+        return new JobBuilder(MAYBANK_CREDIT.jobName(), jobRepository)
+                .start(maybankCreditStep)
+                .build();
+    }
 }
 

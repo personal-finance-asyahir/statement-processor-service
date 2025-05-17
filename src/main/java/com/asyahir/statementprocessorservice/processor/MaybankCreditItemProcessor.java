@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.Locale;
 import java.util.UUID;
 
 public class MaybankCreditItemProcessor implements ItemProcessor<MaybankCreditData, MaybankCredit> {
@@ -25,14 +27,17 @@ public class MaybankCreditItemProcessor implements ItemProcessor<MaybankCreditDa
 
         char operation = '-';
 
-        String amount = item.getAmount();
+        String amount = StringUtils.replace(item.getAmount(), ",", StringUtils.EMPTY);
         if (StringUtils.contains(amount, "CR")) {
             operation = '+';
             amount = StringUtils.replace(amount, "CR", "");
         }
 
         // Statement Date Year
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yy");
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                .parseCaseInsensitive()
+                .appendPattern("dd MMM yy")
+                .toFormatter(Locale.ENGLISH);
         LocalDate statementDate = LocalDate.parse(item.getStatementDate(), formatter);
 
         // Posting Date

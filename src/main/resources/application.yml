@@ -9,7 +9,7 @@ spring:
     properties:
       hibernate:
         default_schema: statement_processor_db
-#    generate-ddl: true
+    generate-ddl: true
   batch:
     jdbc:
       initialize-schema: always

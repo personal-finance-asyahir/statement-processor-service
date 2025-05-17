@@ -1,13 +1,18 @@
 package com.asyahir.statementprocessorservice.config;
 
+import com.asyahir.statementprocessorservice.entity.MaybankCredit;
 import com.asyahir.statementprocessorservice.entity.MaybankDebit;
+import com.asyahir.statementprocessorservice.listener.MaybankCreditItemWriteListener;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitItemReadListener;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitItemWriteListener;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import com.asyahir.statementprocessorservice.processor.MaybankDebitItemProcessor;
 import com.asyahir.statementprocessorservice.reader.MaybankDebitItemReader;
 import com.asyahir.statementprocessorservice.repository.MaybankDebitRepository;
+import com.asyahir.statementprocessorservice.service.KafkaMessageService;
 import com.asyahir.statementprocessorservice.writer.MaybankDebitItemWriter;
+import org.springframework.batch.core.ItemReadListener;
+import org.springframework.batch.core.ItemWriteListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
@@ -49,6 +54,19 @@ public class MaybankDebitBatchConfiguration {
     }
 
     @Bean
+    @StepScope
+    public ItemReadListener<MaybankDebitData> maybankDebitItemReadListener(@Value("#{jobParameters['input.statement.userid']}") String userId) {
+        return new MaybankDebitItemReadListener(userId);
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriteListener<MaybankDebit> maybankDebitItemWriteListener(@Value("#{jobParameters['input.statement.userid']}") String userId,
+                                                                           KafkaMessageService kafkaMessageService) {
+        return new MaybankDebitItemWriteListener(userId, kafkaMessageService);
+    }
+
+    @Bean
     public TaskExecutor maybankDebitTaskExecutor() {
         return new SimpleAsyncTaskExecutor(TASK_NAME);
     }
@@ -60,16 +78,16 @@ public class MaybankDebitBatchConfiguration {
                                  ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor,
                                  ItemWriter<MaybankDebit> maybankDebitWriter,
                                  TaskExecutor maybankDebitTaskExecutor,
-                                 MaybankDebitItemReadListener readListener,
-                                 MaybankDebitItemWriteListener writeListener){
+                                 ItemReadListener<MaybankDebitData> maybankDebitItemReadListener,
+                                 ItemWriteListener<MaybankDebit> maybankDebitItemWriteListener){
 
         return new StepBuilder(STEP1_NAME, jobRepository)
                 .<MaybankDebitData, MaybankDebit>chunk(10, transactionManager)
                 .reader(maybankDebitReader)
-                .listener(readListener)
+                .listener(maybankDebitItemReadListener)
                 .processor(maybankDebitProcessor)
                 .writer(maybankDebitWriter)
-                .listener(writeListener)
+                .listener(maybankDebitItemWriteListener)
                 .taskExecutor(maybankDebitTaskExecutor)
                 .build();
     }

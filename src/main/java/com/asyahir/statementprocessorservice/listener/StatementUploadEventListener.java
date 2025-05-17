@@ -26,13 +26,20 @@ import java.util.UUID;
 public class StatementUploadEventListener {
 
     private final ObjectMapper objectMapper;
+
     private final JobLauncher jobLauncher;
+
     private final Job maybankDebitJob;
 
-    public StatementUploadEventListener(ObjectMapper objectMapper, JobLauncher jobLauncher, Job maybankDebitJob) {
+    private final Job maybankCreditJob;
+
+
+    public StatementUploadEventListener(ObjectMapper objectMapper, JobLauncher jobLauncher,
+                                        Job maybankDebitJob, Job maybankCreditJob) {
         this.objectMapper = objectMapper;
         this.jobLauncher = jobLauncher;
         this.maybankDebitJob = maybankDebitJob;
+        this.maybankCreditJob = maybankCreditJob;
     }
 
     @KafkaListener(topics = "statement.upload")
@@ -52,6 +59,9 @@ public class StatementUploadEventListener {
             if (StringUtils.containsIgnoreCase(su.getBank(), "Maybank") &&
             StringUtils.containsIgnoreCase(su.getTitle(), "Saving")) {
                 jobLauncher.run(maybankDebitJob, jobParameters);
+            } else if (StringUtils.containsIgnoreCase(su.getBank(), "Maybank") &&
+                    StringUtils.containsIgnoreCase(su.getTitle(), "Credit")) {
+                jobLauncher.run(maybankCreditJob, jobParameters);
             }
         }
 
