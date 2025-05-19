@@ -29,7 +29,7 @@ public class MaybankDebitItemWriteListener implements ItemWriteListener<MaybankD
         try {
             List<MaybankDebit> statements = (List<MaybankDebit>) items.getItems();
 
-            this.kafkaMessageService.sendMessage(MessageQueueTopic.STATEMENT_PROCESS_TOPIC,
+            this.kafkaMessageService.sendMessage(MessageQueueTopic.STATEMENT_PROCESS_MAYBANKDEBIT,
                     userId,
                     statements,
                     Module.MAYBANKDEBIT_ITEMWRITE);

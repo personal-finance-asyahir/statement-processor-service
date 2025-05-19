@@ -29,7 +29,7 @@ public class MaybankCreditItemWriteListener implements ItemWriteListener<Maybank
         try {
             List<MaybankCredit> statements = (List<MaybankCredit>) items.getItems();
 
-            this.kafkaMessageService.sendMessage(MessageQueueTopic.STATEMENT_PROCESS_TOPIC,
+            this.kafkaMessageService.sendMessage(MessageQueueTopic.STATEMENT_PROCESS_MAYBANKCREDIT,
                     userId,
                     statements,
                     Module.MAYBANKCREDIT_ITEMWRITE);
