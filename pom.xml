@@ -18,7 +18,15 @@
         <license/>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>asyahir</id>
+            <name>Ahmad Syahir Abdul Ghariff</name>
+            <email>syahirghariff@gmail.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>Asia/Kuala_Lumpur</timezone>
+        </developer>
     </developers>
     <scm>
         <connection/>
