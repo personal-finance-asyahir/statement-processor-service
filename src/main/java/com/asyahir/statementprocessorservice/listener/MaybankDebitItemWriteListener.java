@@ -3,12 +3,14 @@ package com.asyahir.statementprocessorservice.listener;
 import com.asyahir.statementprocessorservice.constant.MessageQueueTopic;
 import com.asyahir.statementprocessorservice.constant.Module;
 import com.asyahir.statementprocessorservice.entity.MaybankDebit;
+import com.asyahir.statementprocessorservice.pojo.MaybankDebitJson;
 import com.asyahir.statementprocessorservice.service.KafkaMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.ItemWriteListener;
 import org.springframework.batch.item.Chunk;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class MaybankDebitItemWriteListener implements ItemWriteListener<MaybankDebit> {
@@ -27,7 +29,9 @@ public class MaybankDebitItemWriteListener implements ItemWriteListener<MaybankD
     @SuppressWarnings("unchecked")
     public void afterWrite(Chunk<? extends MaybankDebit> items) {
         try {
-            List<MaybankDebit> statements = (List<MaybankDebit>) items.getItems();
+            List<MaybankDebitJson> statements = items.getItems().stream()
+                    .map(MaybankDebitJson::new)
+                    .collect(Collectors.toUnmodifiableList());
 
             this.kafkaMessageService.sendMessage(MessageQueueTopic.STATEMENT_PROCESS_MAYBANKDEBIT,
                     userId,
