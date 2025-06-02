@@ -45,7 +45,7 @@ public class StatementUploadEventListener {
     @KafkaListener(topics = "statement.upload")
     public void statementUpload(@Payload String request,
                                 @Header(name = KafkaHeaders.RECEIVED_KEY, required = false) String key,
-                                @Header("created-at") String createdAt) throws JsonProcessingException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+                                @Header(name = KafkaHeaders.CORRELATION_ID, required = false) String corrId) throws JsonProcessingException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
         List<StatementUpload> statementUploads = objectMapper.readValue(request, new TypeReference<List<StatementUpload>>() {});
 

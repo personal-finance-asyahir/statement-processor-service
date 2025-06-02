@@ -10,12 +10,10 @@ import org.apache.commons.validator.routines.CurrencyValidator;
 import org.apache.commons.validator.routines.DateValidator;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.springframework.core.io.ClassPathResource;
 import technology.tabula.*;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
