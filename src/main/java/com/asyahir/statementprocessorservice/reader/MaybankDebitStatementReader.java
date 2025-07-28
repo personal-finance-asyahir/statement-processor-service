@@ -23,6 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class MaybankDebitStatementReader extends StatementReader<MaybankDebitData> {
@@ -48,40 +49,36 @@ public class MaybankDebitStatementReader extends StatementReader<MaybankDebitDat
 
                 List<List<RectangularTextContainer>> rows = table.getRows();
 
-                for (int i = 1; i < rows.size(); i++) {
+                IntStream.range(1, CollectionUtils.size(rows)).forEach(i -> {
                     List<RectangularTextContainer> cells = rows.get(i);
                     List<MaybankDebitData> debits = new ArrayList<>();
 
-                    for (int k = 0; k < cells.size(); k++) {
+                    IntStream.range(0, CollectionUtils.size(cells)).forEach(k -> {
                         RectangularTextContainer<TextChunk> content = cells.get(k);
                         List<String> items = this.getItems(content);
 
                         switch (k) {
-                            case 0: // Date
-                                debits.addAll(this.generateDebitList(items));
-                                break;
-
-                            case 1: // Transaction Description
+                            case 0 -> debits.addAll(this.generateDebitList(items));
+                            case 1 -> {
                                 if (CollectionUtils.isEmpty(debits)) break;
                                 List<String> descriptions = this.getTransactionDescriptionsOrAssignPrevious(items, allDebits);
                                 this.updateDebits(debits, descriptions, MaybankDebitData::setDescription);
-                                break;
-
-                            case 2: // Transaction Amount
+                            }
+                            case 2 -> {
                                 List<String> amounts = this.getTransactionAmounts(items);
                                 this.updateDebits(debits, amounts, MaybankDebitData::setAmount);
-                                break;
-
-                            case 3: // Statement Balance
+                            }
+                            case 3 -> {
                                 List<String> statementBalances = this.getStatementAmounts(items);
                                 if (CollectionUtils.size(statementBalances) > CollectionUtils.size(debits)) {
                                     statementBalances.removeFirst();
                                 }
                                 this.updateDebits(debits, statementBalances, MaybankDebitData::setStatementBalance);
+                            }
                         }
-                    }
+                    });
                     allDebits.addAll(debits);
-                }
+                });
             }
             return allDebits;
         } catch (IOException e) {
@@ -185,9 +182,9 @@ public class MaybankDebitStatementReader extends StatementReader<MaybankDebitDat
     }
 
     private void updateDebits(List<MaybankDebitData> debits, List<String> data, BiConsumer<MaybankDebitData, String> setter) {
-        for (int p = 0; p < data.size(); p++) {
+        IntStream.range(0, CollectionUtils.size(debits)).forEach(p -> {
             MaybankDebitData debit = debits.get(p);
             setter.accept(debit, data.get(p));
-        }
+        });
     }
 }
