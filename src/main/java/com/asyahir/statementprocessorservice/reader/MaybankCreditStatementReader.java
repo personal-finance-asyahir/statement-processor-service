@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MaybankCreditStatementReader extends StatementReader<MaybankCreditData>{
 
@@ -54,35 +55,31 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
 
                 for (List<RectangularTextContainer> cells : rows) {
                     List<MaybankCreditData> credits = new ArrayList<>();
-                    for (int k = 0; k < cells.size(); k++) {
+
+                    IntStream.range(0, CollectionUtils.size(cells)).forEach(k -> {
                         RectangularTextContainer<TextChunk> content = cells.get(k);
 
                         List<String> items = this.getItems(content);
-
                         if (isFirstPage) items.removeFirst();
 
                         switch(k) {
-                            case 0: // Posting Date
-                                credits.addAll(this.generateCreditList(items));
-                                break;
-                            case 1: // Transaction Date
-                                this.updateCredits(credits, items, MaybankCreditData::setDate);
-                                break;
-                            case 2: // Transaction Description
+                            case 0 -> credits.addAll(this.generateCreditList(items));
+                            case 1 -> this.updateCredits(credits, items, MaybankCreditData::setDate);
+                            case 2 -> {
                                 items = this.getDescriptionItems(content);
                                 if (isFirstPage) {
                                     items = items.subList(7, CollectionUtils.size(items));
                                 }
                                 this.updateCredits(credits, items, MaybankCreditData::setDescription);
-                                break;
-                            case 3: // Amount
+                            }
+                            case 3 -> {
                                 if (CollectionUtils.size(items) > CollectionUtils.size(credits)) {
                                     items.removeLast();
                                 }
                                 this.updateCredits(credits, items, MaybankCreditData::setAmount);
-                                break;
+                            }
                         }
-                    }
+                    });
                     this.allCredits.addAll(credits);
                 }
             }
@@ -95,15 +92,14 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
     private void extractStatementDate(Table table){
         List<List<RectangularTextContainer>> rows = this.getTrimmedRows(table);
         for (List<RectangularTextContainer> cells : rows) {
-            for (int i = 0; i < cells.size(); i++) {
+            IntStream.range(0, CollectionUtils.size(cells)).forEach(i -> {
                 RectangularTextContainer<TextChunk> content = cells.get(i);
                 String text = content.getText().replace("\r", "");
-                if (i==0) {
-                    this.statementDate = StringUtils.trim(text);
-                } else if (i==1) {
-                    this.paymentDueDate = StringUtils.trim(text);
+                switch(i) {
+                    case 0 -> this.statementDate = StringUtils.trim(text);
+                    case 1 -> this.paymentDueDate = StringUtils.trim(text);
                 }
-            }
+            });
         }
     }
 
@@ -138,9 +134,9 @@ public class MaybankCreditStatementReader extends StatementReader<MaybankCreditD
     }
 
     private void updateCredits(List<MaybankCreditData> credits, List<String> data, BiConsumer<MaybankCreditData, String> setter) {
-        for (int p = 0; p < credits.size(); p++) {
+        IntStream.range(0, CollectionUtils.size(credits)).forEach(p -> {
             MaybankCreditData creditData = credits.get(p);
             setter.accept(creditData, data.get(p));
-        }
+        });
     }
 }
