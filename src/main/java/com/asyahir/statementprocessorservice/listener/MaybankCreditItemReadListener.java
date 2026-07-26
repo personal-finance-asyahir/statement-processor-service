@@ -3,7 +3,7 @@ package com.asyahir.statementprocessorservice.listener;
 import com.asyahir.statementprocessorservice.constant.Module;
 import com.asyahir.statementprocessorservice.pojo.MaybankCreditData;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.ItemReadListener;
+import org.springframework.batch.core.listener.ItemReadListener;
 
 @Slf4j
 public class MaybankCreditItemReadListener implements ItemReadListener<MaybankCreditData> {

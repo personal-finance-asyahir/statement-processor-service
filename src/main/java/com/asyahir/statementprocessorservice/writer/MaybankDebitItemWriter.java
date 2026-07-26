@@ -3,9 +3,9 @@ package com.asyahir.statementprocessorservice.writer;
 import com.asyahir.statementprocessorservice.entity.MaybankDebit;
 import com.asyahir.statementprocessorservice.repository.MaybankDebitRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
+import org.springframework.batch.infrastructure.item.Chunk;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 
 public class MaybankDebitItemWriter implements ItemWriter<MaybankDebit> {
 

@@ -2,9 +2,11 @@ package com.asyahir.statementprocessorservice.processor;
 
 import com.asyahir.statementprocessorservice.entity.MaybankDebit;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.lang.NonNull;
-import org.springframework.batch.item.ItemProcessor;
+import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,6 +51,6 @@ public class MaybankDebitItemProcessor implements ItemProcessor<MaybankDebitData
     }
 
     private String removeCommas(String amount) {
-        return StringUtils.replace(amount, ",", StringUtils.EMPTY);
+        return Strings.CS.replace(amount, ",", StringUtils.EMPTY);
     }
 }

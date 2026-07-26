@@ -1,8 +1,6 @@
 package com.asyahir.statementprocessorservice.config;
 
-import com.asyahir.statementprocessorservice.entity.MaybankCredit;
 import com.asyahir.statementprocessorservice.entity.MaybankDebit;
-import com.asyahir.statementprocessorservice.listener.MaybankCreditItemWriteListener;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitItemReadListener;
 import com.asyahir.statementprocessorservice.listener.MaybankDebitItemWriteListener;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
@@ -11,18 +9,19 @@ import com.asyahir.statementprocessorservice.reader.MaybankDebitItemReader;
 import com.asyahir.statementprocessorservice.repository.MaybankDebitRepository;
 import com.asyahir.statementprocessorservice.service.KafkaMessageService;
 import com.asyahir.statementprocessorservice.writer.MaybankDebitItemWriter;
-import org.springframework.batch.core.ItemReadListener;
-import org.springframework.batch.core.ItemWriteListener;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.listener.ItemReadListener;
+import org.springframework.batch.core.listener.ItemWriteListener;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemReader;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -62,12 +61,12 @@ public class MaybankDebitBatchConfiguration {
     @Bean
     @StepScope
     public ItemWriteListener<MaybankDebit> maybankDebitItemWriteListener(@Value("#{jobParameters['input.statement.userid']}") String userId,
-                                                                           KafkaMessageService kafkaMessageService) {
+                                                                         KafkaMessageService kafkaMessageService) {
         return new MaybankDebitItemWriteListener(userId, kafkaMessageService);
     }
 
     @Bean
-    public TaskExecutor maybankDebitTaskExecutor() {
+    public AsyncTaskExecutor maybankDebitTaskExecutor() {
         return new SimpleAsyncTaskExecutor(TASK_NAME);
     }
 
@@ -77,12 +76,12 @@ public class MaybankDebitBatchConfiguration {
                                  ItemReader<MaybankDebitData> maybankDebitReader,
                                  ItemProcessor<MaybankDebitData, MaybankDebit> maybankDebitProcessor,
                                  ItemWriter<MaybankDebit> maybankDebitWriter,
-                                 TaskExecutor maybankDebitTaskExecutor,
+                                 AsyncTaskExecutor maybankDebitTaskExecutor,
                                  ItemReadListener<MaybankDebitData> maybankDebitItemReadListener,
                                  ItemWriteListener<MaybankDebit> maybankDebitItemWriteListener){
 
         return new StepBuilder(STEP1_NAME, jobRepository)
-                .<MaybankDebitData, MaybankDebit>chunk(10, transactionManager)
+                .<MaybankDebitData, MaybankDebit>chunk(10)
                 .reader(maybankDebitReader)
                 .listener(maybankDebitItemReadListener)
                 .processor(maybankDebitProcessor)

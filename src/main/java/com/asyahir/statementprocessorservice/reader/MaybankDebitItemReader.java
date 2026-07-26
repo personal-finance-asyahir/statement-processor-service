@@ -2,10 +2,7 @@ package com.asyahir.statementprocessorservice.reader;
 
 import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.NonTransientResourceException;
-import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.batch.infrastructure.item.ItemReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ public class MaybankDebitItemReader implements ItemReader<MaybankDebitData> {
     }
 
     @Override
-    public MaybankDebitData read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+    public MaybankDebitData read() throws Exception {
         if (CollectionUtils.isNotEmpty(maybankDebitData)) {
             return maybankDebitData.removeFirst();
         }

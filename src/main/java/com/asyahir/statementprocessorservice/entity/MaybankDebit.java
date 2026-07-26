@@ -5,7 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+
+import org.apache.commons.lang3.Strings;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class MaybankDebit {
                 ", userId=" + userId +
                 ", amount=" + amount +
                 ", statementBalance=" + statementBalance +
-                ", description='" + StringUtils.replace(description, "\n", "") + '\'' +
+                ", description='" + Strings.CS.replace(description, "\n", "") + '\'' +
                 ", operation=" + operation +
                 ", transactionDate=" + transactionDate +
                 ", insertedDateTime=" + insertedDateTime +

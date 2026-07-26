@@ -6,8 +6,8 @@ import com.asyahir.statementprocessorservice.entity.MaybankDebit;
 import com.asyahir.statementprocessorservice.pojo.MaybankDebitJson;
 import com.asyahir.statementprocessorservice.service.KafkaMessageService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.ItemWriteListener;
-import org.springframework.batch.item.Chunk;
+import org.springframework.batch.core.listener.ItemWriteListener;
+import org.springframework.batch.infrastructure.item.Chunk;
 
 import java.util.List;
 import java.util.stream.Collectors;

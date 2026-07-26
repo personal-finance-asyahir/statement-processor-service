@@ -2,8 +2,8 @@ package com.asyahir.statementprocessorservice.writer;
 
 import com.asyahir.statementprocessorservice.entity.MaybankCredit;
 import com.asyahir.statementprocessorservice.repository.MaybankCreditRepository;
-import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.Chunk;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 
 public class MaybankCreditItemWriter implements ItemWriter<MaybankCredit> {
 

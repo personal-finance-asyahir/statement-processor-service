@@ -2,9 +2,11 @@ package com.asyahir.statementprocessorservice.processor;
 
 import com.asyahir.statementprocessorservice.entity.MaybankCredit;
 import com.asyahir.statementprocessorservice.pojo.MaybankCreditData;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.lang.NonNull;
+import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,10 +29,10 @@ public class MaybankCreditItemProcessor implements ItemProcessor<MaybankCreditDa
 
         char operation = '-';
 
-        String amount = StringUtils.replace(item.getAmount(), ",", StringUtils.EMPTY);
-        if (StringUtils.contains(amount, "CR")) {
+        String amount = Strings.CS.replace(item.getAmount(), ",", StringUtils.EMPTY);
+        if (Strings.CS.contains(amount, "CR")) {
             operation = '+';
-            amount = StringUtils.replace(amount, "CR", "");
+            amount = Strings.CS.replace(amount, "CR", "");
         }
 
         // Statement Date Year

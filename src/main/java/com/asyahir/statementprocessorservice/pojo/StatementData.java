@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 @Data
 @AllArgsConstructor
@@ -17,10 +17,13 @@ public class StatementData {
 
     @Override
     public String toString() {
+
         return "StatementData{" +
                 "date='" + date + '\'' +
-                ", description='" + StringUtils.replace(description, "\n", "") + '\'' +
+                ", description='" + Strings.CS.replace(description, "\n", "") + '\'' +
                 ", amount='" + amount + '\'' +
                 '}';
     }
+
+
 }

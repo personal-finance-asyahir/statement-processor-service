@@ -9,18 +9,19 @@ import com.asyahir.statementprocessorservice.reader.MaybankCreditItemReader;
 import com.asyahir.statementprocessorservice.repository.MaybankCreditRepository;
 import com.asyahir.statementprocessorservice.service.KafkaMessageService;
 import com.asyahir.statementprocessorservice.writer.MaybankCreditItemWriter;
-import org.springframework.batch.core.ItemReadListener;
-import org.springframework.batch.core.ItemWriteListener;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.listener.ItemReadListener;
+import org.springframework.batch.core.listener.ItemWriteListener;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemReader;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -63,22 +64,22 @@ public class MaybankCreditBatchConfiguration {
     }
 
     @Bean
-    public TaskExecutor maybankCreditTaskExecutor() {
+    public AsyncTaskExecutor maybankCreditTaskExecutor() {
         return new SimpleAsyncTaskExecutor(TASK_NAME);
     }
 
     @Bean
     public Step maybankCreditStep(JobRepository jobRepository,
-                                 PlatformTransactionManager transactionManager,
-                                 ItemReader<MaybankCreditData> maybankCreditReader,
-                                 ItemProcessor<MaybankCreditData, MaybankCredit> maybankCreditProcessor,
-                                 ItemWriter<MaybankCredit> maybankCreditWriter,
-                                 TaskExecutor maybankCreditTaskExecutor,
-                                 ItemReadListener<MaybankCreditData> maybankCreditItemReadListener,
-                                 ItemWriteListener<MaybankCredit> maybankCreditItemWriteListener){
+                                  PlatformTransactionManager transactionManager,
+                                  ItemReader<MaybankCreditData> maybankCreditReader,
+                                  ItemProcessor<MaybankCreditData, MaybankCredit> maybankCreditProcessor,
+                                  ItemWriter<MaybankCredit> maybankCreditWriter,
+                                  AsyncTaskExecutor maybankCreditTaskExecutor,
+                                  ItemReadListener<MaybankCreditData> maybankCreditItemReadListener,
+                                  ItemWriteListener<MaybankCredit> maybankCreditItemWriteListener){
 
         return new StepBuilder(STEP1_NAME, jobRepository)
-                .<MaybankCreditData, MaybankCredit>chunk(10, transactionManager)
+                .<MaybankCreditData, MaybankCredit>chunk(10)
                 .reader(maybankCreditReader)
                 .listener(maybankCreditItemReadListener)
                 .processor(maybankCreditProcessor)

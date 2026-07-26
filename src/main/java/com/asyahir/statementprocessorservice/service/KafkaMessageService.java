@@ -1,13 +1,12 @@
 package com.asyahir.statementprocessorservice.service;
 
-import com.asyahir.statementprocessorservice.constant.MessageQueueTopic;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +26,7 @@ public final class KafkaMessageService {
         this.objectMapper = objectMapper;
     }
 
-    public void sendMessage(String topic, String key, List<?> data, String module) throws JsonProcessingException {
+    public void sendMessage(String topic, String key, List<?> data, String module) throws JacksonException {
         String message = objectMapper.writeValueAsString(data);
 
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, key, message);

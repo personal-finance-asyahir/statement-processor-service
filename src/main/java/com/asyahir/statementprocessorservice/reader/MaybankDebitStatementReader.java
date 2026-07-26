@@ -5,7 +5,9 @@ import com.asyahir.statementprocessorservice.pojo.MaybankDebitData;
 import com.asyahir.statementprocessorservice.pojo.TextChunkCustom;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.validator.routines.CurrencyValidator;
 import org.apache.commons.validator.routines.DateValidator;
 import org.apache.pdfbox.Loader;
@@ -128,7 +130,7 @@ public class MaybankDebitStatementReader extends StatementReader<MaybankDebitDat
     }
 
     private final BiFunction<ArrayList<String>, String, ArrayList<String>> accumulatorMergeDescriptions = (previousList, nextText) -> {
-        if (StringUtils.startsWith(nextText, " ")) {
+        if (Strings.CS.startsWith(nextText, " ")) {
             String item = StringUtils.trim(nextText);
             if (CollectionUtils.isNotEmpty(previousList)) {
                 int lastIndex = CollectionUtils.size(previousList) - 1;
@@ -156,7 +158,7 @@ public class MaybankDebitStatementReader extends StatementReader<MaybankDebitDat
 
     private List<String> filterIrrelevantDescriptions(List<String> descriptions) {
         return descriptions.stream()
-                .filter(d -> !StringUtils.containsAnyIgnoreCase(d, "BEGINNING BALANCE",
+                .filter(d -> !Strings.CI.containsAny(d, "BEGINNING BALANCE",
                         "ENDING BALANCE",
                         "TOTAL CREDIT",
                         "TOTAL DEBIT",
