@@ -54,12 +54,13 @@ public class StatementUploadEventListener {
                     .addString("input.statement.job", UUID.randomUUID().toString())
                     .toJobParameters();
 
-            if (Strings.CI.contains(su.getBank(), "Maybank") &&
-                    Strings.CI.contains(su.getTitle(), "Saving")) {
-                jobOperator.start(maybankDebitJob, jobParameters);
-            } else if (Strings.CI.contains(su.getBank(), "Maybank") &&
-                    Strings.CI.contains(su.getTitle(), "Credit")) {
-                jobOperator.start(maybankCreditJob, jobParameters);
+            if (Strings.CI.contains(su.getBank(), "Maybank")) {
+                if (Strings.CI.containsAny(su.getTitle(), "Saving", "PERSONAL SAVER-i")) {
+                    jobOperator.start(maybankDebitJob, jobParameters);
+                }
+                if (Strings.CI.contains(su.getTitle(), "Credit")) {
+                    jobOperator.start(maybankCreditJob, jobParameters);
+                }
             }
         }
 
