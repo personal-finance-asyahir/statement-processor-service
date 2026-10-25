@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class StatementProcessorServiceApplication {
 
-    static void main(String[] args) {
+    void main(String[] args) {
         SpringApplication.run(StatementProcessorServiceApplication.class, args);
     }
 
